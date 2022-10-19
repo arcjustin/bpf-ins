@@ -32,3 +32,9 @@ impl From<Vec<Instruction>> for Program {
         instructions[0..].as_ref().into()
     }
 }
+
+impl From<&Vec<Instruction>> for Program {
+    fn from(instructions: &Vec<Instruction>) -> Self {
+        instructions[0..].as_ref().into()
+    }
+}
