@@ -211,6 +211,62 @@ impl ArithmeticInstruction {
     fn opcode(&self) -> u8 {
         self.class.opcode() | self.source.opcode() | self.operation.opcode() | self.order.opcode()
     }
+
+    /// Returns the opcode's class.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, Opcode, OpcodeClass, Register};
+    ///
+    /// let instruction = Instruction::addx64(Register::R1, Register::R2);
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Arithmetic(_)));
+    /// if let Opcode::Arithmetic(arithmetic) = opcode {
+    ///     assert!(matches!(arithmetic.get_class(), OpcodeClass::Arithmetic64));
+    /// }
+    /// ```
+    pub fn get_class(&self) -> &OpcodeClass {
+        &self.class
+    }
+
+    /// Returns the opcode's source operand.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, Opcode, Register, SourceOperand};
+    ///
+    /// let instruction = Instruction::addx64(Register::R1, Register::R2);
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Arithmetic(_)));
+    /// if let Opcode::Arithmetic(arithmetic) = opcode {
+    ///     assert!(matches!(arithmetic.get_source(), SourceOperand::Register));
+    /// }
+    /// ```
+    pub fn get_source(&self) -> &SourceOperand {
+        &self.source
+    }
+
+    /// Returns the arithmetic operation.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{ArithmeticOperation, Instruction, Opcode, Register};
+    ///
+    /// let instruction = Instruction::addx64(Register::R1, Register::R2);
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Arithmetic(_)));
+    /// if let Opcode::Arithmetic(arithmetic) = opcode {
+    ///     assert!(matches!(arithmetic.get_operation(), ArithmeticOperation::Add));
+    /// }
+    /// ```
+    pub fn get_operation(&self) -> &ArithmeticOperation {
+        &self.operation
+    }
+
+    /// Returns the operation's swap order, if the operation is ArithmeticOperation::End.
+    pub fn get_order(&self) -> &SwapOrder {
+        &self.order
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -313,6 +369,57 @@ impl JumpInstruction {
 
     fn opcode(&self) -> u8 {
         self.class.opcode() | self.source.opcode() | self.operation.opcode()
+    }
+
+    /// Returns the opcode's class.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, Opcode, OpcodeClass, Register};
+    ///
+    /// let instruction = Instruction::exit();
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Jump(_)));
+    /// if let Opcode::Jump(jump) = opcode {
+    ///     assert!(matches!(jump.get_class(), OpcodeClass::Jump));
+    /// }
+    /// ```
+    pub fn get_class(&self) -> &OpcodeClass {
+        &self.class
+    }
+
+    /// Returns the opcode's source operand.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, Opcode, Register, SourceOperand};
+    ///
+    /// let instruction = Instruction::exit();
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Jump(_)));
+    /// if let Opcode::Jump(jump) = opcode {
+    ///     assert!(matches!(jump.get_source(), SourceOperand::Immediate));
+    /// }
+    /// ```
+    pub fn get_source(&self) -> &SourceOperand {
+        &self.source
+    }
+
+    /// Returns the jump operation.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, JumpOperation, Opcode, Register};
+    ///
+    /// let instruction = Instruction::exit();
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Jump(_)));
+    /// if let Opcode::Jump(jump) = opcode {
+    ///     assert!(matches!(jump.get_operation(), JumpOperation::Exit));
+    /// }
+    /// ```
+    pub fn get_operation(&self) -> &JumpOperation {
+        &self.operation
     }
 }
 
@@ -436,6 +543,57 @@ impl MemoryInstruction {
 
     fn opcode(&self) -> u8 {
         self.class.opcode() | self.size.opcode() | self.mode.opcode()
+    }
+
+    /// Returns the opcode's class.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, Opcode, OpcodeClass, Register};
+    ///
+    /// let instruction = Instruction::storex64(Register::R1, 0, Register::R2);
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Memory(_)));
+    /// if let Opcode::Memory(memory) = opcode {
+    ///     assert!(matches!(memory.get_class(), OpcodeClass::StoreReg));
+    /// }
+    /// ```
+    pub fn get_class(&self) -> &OpcodeClass {
+        &self.class
+    }
+
+    /// Returns the memory operation size.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, MemoryOpSize, Opcode, Register};
+    ///
+    /// let instruction = Instruction::storex64(Register::R1, 0, Register::R2);
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Memory(_)));
+    /// if let Opcode::Memory(memory) = opcode {
+    ///     assert!(matches!(memory.get_size(), MemoryOpSize::DoubleWord));
+    /// }
+    /// ```
+    pub fn get_size(&self) -> &MemoryOpSize {
+        &self.size
+    }
+
+    /// Returns the memory operation mode.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, MemoryOpMode, Opcode, Register};
+    ///
+    /// let instruction = Instruction::storex64(Register::R1, 0, Register::R2);
+    /// let opcode = instruction.get_opcode();
+    /// assert!(matches!(opcode, Opcode::Memory(_)));
+    /// if let Opcode::Memory(memory) = opcode {
+    ///     assert!(matches!(memory.get_mode(), MemoryOpMode::Memory));
+    /// }
+    /// ```
+    pub fn get_mode(&self) -> &MemoryOpMode {
+        &self.mode
     }
 }
 
