@@ -52,11 +52,10 @@ impl OpcodeClass {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum SourceOperand {
-    #[default]
     Immediate, // use immediate for jump/arithmetic
-    Register, // use source register for jump/arithmetic
+    Register,  // use source register for jump/arithmetic
 }
 
 impl SourceOperand {
@@ -411,7 +410,7 @@ impl MemoryOpLoadType {
         }
     }
 
-    pub fn register_identifier(&self) -> Register {
+    pub const fn register_identifier(&self) -> Register {
         match self {
             Self::Void => Register::R0,
             Self::Map => Register::R1,
@@ -688,46 +687,46 @@ impl Instruction {
         self.imm
     }
 
-    pub fn alu32(reg: Register, imm: i32, op: ArithmeticOperation) -> Self {
+    pub const fn alu32(reg: Register, imm: i32, op: ArithmeticOperation) -> Self {
         let opcode = Opcode::Arithmetic(ArithmeticInstruction {
             class: OpcodeClass::Arithmetic,
             source: SourceOperand::Immediate,
             operation: op,
-            order: Default::default(),
+            order: SwapOrder::Little,
         });
 
         Self {
             opcode,
             dst_reg: reg,
-            src_reg: Default::default(),
+            src_reg: Register::R0,
             offset: 0,
-            imm: imm.into(),
+            imm: imm as i64,
         }
     }
 
-    pub fn alu64(reg: Register, imm: i32, op: ArithmeticOperation) -> Self {
+    pub const fn alu64(reg: Register, imm: i32, op: ArithmeticOperation) -> Self {
         let opcode = Opcode::Arithmetic(ArithmeticInstruction {
             class: OpcodeClass::Arithmetic64,
             source: SourceOperand::Immediate,
             operation: op,
-            order: Default::default(),
+            order: SwapOrder::Little,
         });
 
         Self {
             opcode,
             dst_reg: reg,
-            src_reg: Default::default(),
+            src_reg: Register::R0,
             offset: 0,
-            imm: imm.into(),
+            imm: imm as i64,
         }
     }
 
-    pub fn alux32(dst_reg: Register, src_reg: Register, op: ArithmeticOperation) -> Self {
+    pub const fn alux32(dst_reg: Register, src_reg: Register, op: ArithmeticOperation) -> Self {
         let opcode = Opcode::Arithmetic(ArithmeticInstruction {
             class: OpcodeClass::Arithmetic,
             source: SourceOperand::Register,
             operation: op,
-            order: Default::default(),
+            order: SwapOrder::Little,
         });
 
         Self {
@@ -739,12 +738,12 @@ impl Instruction {
         }
     }
 
-    pub fn alux64(dst_reg: Register, src_reg: Register, op: ArithmeticOperation) -> Self {
+    pub const fn alux64(dst_reg: Register, src_reg: Register, op: ArithmeticOperation) -> Self {
         let opcode = Opcode::Arithmetic(ArithmeticInstruction {
             class: OpcodeClass::Arithmetic64,
             source: SourceOperand::Register,
             operation: op,
-            order: Default::default(),
+            order: SwapOrder::Little,
         });
 
         Self {
@@ -756,55 +755,55 @@ impl Instruction {
         }
     }
 
-    pub fn add32(reg: Register, imm: i32) -> Self {
+    pub const fn add32(reg: Register, imm: i32) -> Self {
         Self::alu32(reg, imm, ArithmeticOperation::Add)
     }
 
-    pub fn add64(reg: Register, imm: i32) -> Self {
+    pub const fn add64(reg: Register, imm: i32) -> Self {
         Self::alu64(reg, imm, ArithmeticOperation::Add)
     }
 
-    pub fn addx32(dst_reg: Register, src_reg: Register) -> Self {
+    pub const fn addx32(dst_reg: Register, src_reg: Register) -> Self {
         Self::alux32(dst_reg, src_reg, ArithmeticOperation::Add)
     }
 
-    pub fn addx64(dst_reg: Register, src_reg: Register) -> Self {
+    pub const fn addx64(dst_reg: Register, src_reg: Register) -> Self {
         Self::alux64(dst_reg, src_reg, ArithmeticOperation::Add)
     }
 
-    pub fn sub32(reg: Register, imm: i32) -> Self {
+    pub const fn sub32(reg: Register, imm: i32) -> Self {
         Self::alu32(reg, imm, ArithmeticOperation::Sub)
     }
 
-    pub fn sub64(reg: Register, imm: i32) -> Self {
+    pub const fn sub64(reg: Register, imm: i32) -> Self {
         Self::alu64(reg, imm, ArithmeticOperation::Sub)
     }
 
-    pub fn subx32(dst_reg: Register, src_reg: Register) -> Self {
+    pub const fn subx32(dst_reg: Register, src_reg: Register) -> Self {
         Self::alux32(dst_reg, src_reg, ArithmeticOperation::Sub)
     }
 
-    pub fn subx64(dst_reg: Register, src_reg: Register) -> Self {
+    pub const fn subx64(dst_reg: Register, src_reg: Register) -> Self {
         Self::alux64(dst_reg, src_reg, ArithmeticOperation::Sub)
     }
 
-    pub fn mov32(reg: Register, imm: i32) -> Self {
+    pub const fn mov32(reg: Register, imm: i32) -> Self {
         Self::alu32(reg, imm, ArithmeticOperation::Mov)
     }
 
-    pub fn mov64(reg: Register, imm: i32) -> Self {
+    pub const fn mov64(reg: Register, imm: i32) -> Self {
         Self::alu64(reg, imm, ArithmeticOperation::Mov)
     }
 
-    pub fn movx32(dst_reg: Register, src_reg: Register) -> Self {
+    pub const fn movx32(dst_reg: Register, src_reg: Register) -> Self {
         Self::alux32(dst_reg, src_reg, ArithmeticOperation::Mov)
     }
 
-    pub fn movx64(dst_reg: Register, src_reg: Register) -> Self {
+    pub const fn movx64(dst_reg: Register, src_reg: Register) -> Self {
         Self::alux64(dst_reg, src_reg, ArithmeticOperation::Mov)
     }
 
-    pub fn load(reg: Register, imm: i64, size: MemoryOpSize) -> Self {
+    pub const fn load(reg: Register, imm: i64, size: MemoryOpSize) -> Self {
         let opcode = Opcode::Memory(MemoryInstruction {
             class: OpcodeClass::Load,
             size,
@@ -814,29 +813,29 @@ impl Instruction {
         Self {
             opcode,
             dst_reg: reg,
-            src_reg: Default::default(),
+            src_reg: Register::R0,
             offset: 0,
             imm,
         }
     }
 
-    pub fn load8(reg: Register, imm: i8) -> Self {
-        Self::load(reg, imm.into(), MemoryOpSize::Byte)
+    pub const fn load8(reg: Register, imm: i8) -> Self {
+        Self::load(reg, imm as i64, MemoryOpSize::Byte)
     }
 
-    pub fn load16(reg: Register, imm: i16) -> Self {
-        Self::load(reg, imm.into(), MemoryOpSize::HalfWord)
+    pub const fn load16(reg: Register, imm: i16) -> Self {
+        Self::load(reg, imm as i64, MemoryOpSize::HalfWord)
     }
 
-    pub fn load32(reg: Register, imm: i32) -> Self {
-        Self::load(reg, imm.into(), MemoryOpSize::Word)
+    pub const fn load32(reg: Register, imm: i32) -> Self {
+        Self::load(reg, imm as i64, MemoryOpSize::Word)
     }
 
-    pub fn load64(reg: Register, imm: i64) -> Self {
+    pub const fn load64(reg: Register, imm: i64) -> Self {
         Self::load(reg, imm, MemoryOpSize::DoubleWord)
     }
 
-    pub fn loadtype(reg: Register, imm: i64, load_type: MemoryOpLoadType) -> Self {
+    pub const fn loadtype(reg: Register, imm: i64, load_type: MemoryOpLoadType) -> Self {
         let opcode = Opcode::Memory(MemoryInstruction {
             class: OpcodeClass::Load,
             size: MemoryOpSize::DoubleWord,
@@ -852,7 +851,12 @@ impl Instruction {
         }
     }
 
-    pub fn loadx(dst_reg: Register, src_reg: Register, offset: i16, size: MemoryOpSize) -> Self {
+    pub const fn loadx(
+        dst_reg: Register,
+        src_reg: Register,
+        offset: i16,
+        size: MemoryOpSize,
+    ) -> Self {
         let opcode = Opcode::Memory(MemoryInstruction {
             class: OpcodeClass::LoadReg,
             size,
@@ -868,23 +872,23 @@ impl Instruction {
         }
     }
 
-    pub fn loadx8(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
+    pub const fn loadx8(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
         Self::loadx(dst_reg, src_reg, offset, MemoryOpSize::Byte)
     }
 
-    pub fn loadx16(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
+    pub const fn loadx16(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
         Self::loadx(dst_reg, src_reg, offset, MemoryOpSize::HalfWord)
     }
 
-    pub fn loadx32(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
+    pub const fn loadx32(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
         Self::loadx(dst_reg, src_reg, offset, MemoryOpSize::Word)
     }
 
-    pub fn loadx64(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
+    pub const fn loadx64(dst_reg: Register, src_reg: Register, offset: i16) -> Self {
         Self::loadx(dst_reg, src_reg, offset, MemoryOpSize::DoubleWord)
     }
 
-    pub fn store(reg: Register, offset: i16, imm: i64, size: MemoryOpSize) -> Self {
+    pub const fn store(reg: Register, offset: i16, imm: i64, size: MemoryOpSize) -> Self {
         let opcode = Opcode::Memory(MemoryInstruction {
             class: OpcodeClass::Store,
             size,
@@ -894,29 +898,34 @@ impl Instruction {
         Self {
             opcode,
             dst_reg: reg,
-            src_reg: Default::default(),
+            src_reg: Register::R0,
             offset,
             imm,
         }
     }
 
-    pub fn store8(reg: Register, offset: i16, imm: i8) -> Self {
-        Self::store(reg, offset, imm.into(), MemoryOpSize::Byte)
+    pub const fn store8(reg: Register, offset: i16, imm: i8) -> Self {
+        Self::store(reg, offset, imm as i64, MemoryOpSize::Byte)
     }
 
-    pub fn store16(reg: Register, offset: i16, imm: i16) -> Self {
-        Self::store(reg, offset, imm.into(), MemoryOpSize::HalfWord)
+    pub const fn store16(reg: Register, offset: i16, imm: i16) -> Self {
+        Self::store(reg, offset, imm as i64, MemoryOpSize::HalfWord)
     }
 
-    pub fn store32(reg: Register, offset: i16, imm: i32) -> Self {
-        Self::store(reg, offset, imm.into(), MemoryOpSize::Word)
+    pub const fn store32(reg: Register, offset: i16, imm: i32) -> Self {
+        Self::store(reg, offset, imm as i64, MemoryOpSize::Word)
     }
 
-    pub fn store64(reg: Register, offset: i16, imm: i64) -> Self {
+    pub const fn store64(reg: Register, offset: i16, imm: i64) -> Self {
         Self::store(reg, offset, imm, MemoryOpSize::DoubleWord)
     }
 
-    pub fn storex(dst_reg: Register, offset: i16, src_reg: Register, size: MemoryOpSize) -> Self {
+    pub const fn storex(
+        dst_reg: Register,
+        offset: i16,
+        src_reg: Register,
+        size: MemoryOpSize,
+    ) -> Self {
         let opcode = Opcode::Memory(MemoryInstruction {
             class: OpcodeClass::StoreReg,
             size,
@@ -932,49 +941,49 @@ impl Instruction {
         }
     }
 
-    pub fn storex8(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
+    pub const fn storex8(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
         Self::storex(dst_reg, offset, src_reg, MemoryOpSize::Byte)
     }
 
-    pub fn storex16(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
+    pub const fn storex16(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
         Self::storex(dst_reg, offset, src_reg, MemoryOpSize::HalfWord)
     }
 
-    pub fn storex32(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
+    pub const fn storex32(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
         Self::storex(dst_reg, offset, src_reg, MemoryOpSize::Word)
     }
 
-    pub fn storex64(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
+    pub const fn storex64(dst_reg: Register, offset: i16, src_reg: Register) -> Self {
         Self::storex(dst_reg, offset, src_reg, MemoryOpSize::DoubleWord)
     }
 
-    pub fn call(n: u32) -> Self {
+    pub const fn call(n: u32) -> Self {
         let opcode = Opcode::Jump(JumpInstruction {
             class: OpcodeClass::Jump,
-            source: Default::default(),
+            source: SourceOperand::Immediate,
             operation: JumpOperation::Call,
         });
 
         Self {
             opcode,
-            dst_reg: Default::default(),
-            src_reg: Default::default(),
+            dst_reg: Register::R0,
+            src_reg: Register::R0,
             offset: 0,
-            imm: n.into(),
+            imm: n as i64,
         }
     }
 
-    pub fn exit() -> Self {
+    pub const fn exit() -> Self {
         let opcode = Opcode::Jump(JumpInstruction {
             class: OpcodeClass::Jump,
-            source: Default::default(),
+            source: SourceOperand::Immediate,
             operation: JumpOperation::Exit,
         });
 
         Self {
             opcode,
-            dst_reg: Default::default(),
-            src_reg: Default::default(),
+            dst_reg: Register::R0,
+            src_reg: Register::R0,
             offset: 0,
             imm: 0,
         }
