@@ -1,8 +1,6 @@
 pub mod instruction;
-pub mod program;
 
 pub use instruction::*;
-pub use program::*;
 
 #[cfg(test)]
 mod tests {
@@ -460,31 +458,5 @@ mod tests {
     fn exit() {
         let ins = Instruction::exit();
         decode_encode_compare(&ins);
-    }
-
-    fn decode_program(instructions: &[u64]) {
-        let mut wide_count = 0;
-        for i in 0..instructions.len() {
-            if i + wide_count == instructions.len() {
-                break;
-            }
-
-            let ins = Instruction::decode(&instructions[i + wide_count..]).unwrap();
-            if ins.get_opcode().is_wide() {
-                wide_count += 1;
-            }
-        }
-    }
-
-    #[test]
-    fn program_create() {
-        let program = [
-            Instruction::load64(Register::R1, 0),
-            Instruction::mov32(Register::R0, 0),
-            Instruction::load64(Register::R8, 0),
-            Instruction::mov32(Register::R0, 0),
-            Instruction::exit(),
-        ];
-        decode_program(program.into());
     }
 }

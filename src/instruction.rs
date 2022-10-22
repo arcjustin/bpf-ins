@@ -453,6 +453,10 @@ impl MemoryInstruction {
         self.class.opcode() | self.size.opcode() | self.mode.opcode()
     }
 
+    pub fn get_class(&self) -> &OpcodeClass {
+        &self.class
+    }
+
     pub fn get_size(&self) -> &MemoryOpSize {
         &self.size
     }
@@ -604,6 +608,7 @@ impl Opcode {
     pub fn is_wide(&self) -> bool {
         if let Self::Memory(memory_instruction) = self {
             matches!(memory_instruction.get_size(), MemoryOpSize::DoubleWord)
+                && matches!(memory_instruction.get_class(), OpcodeClass::Load)
         } else {
             false
         }
@@ -652,7 +657,7 @@ impl Instruction {
         let opcode = self.opcode.opcode() as u64;
         let dst_reg = self.dst_reg.as_num() as u64;
         let src_reg = self.src_reg.as_num() as u64;
-        let offset = self.offset as u64;
+        let offset = (self.offset as u64) & 0xffff;
         let imm = self.imm as u64;
         let n = opcode | (dst_reg << 8) | (src_reg << 12) | (offset << 16) | (imm << 32);
         if self.opcode.is_wide() {
