@@ -2,7 +2,7 @@
 name = "bpf-ins"
 version = "0.1.0"
 edition = "2021"
-categories = ["compilers", "operating-systems", "data-structures"]
+categories = ["compilers", "data-structures"]
 homepage = "https://github.com/arcjustin/bpf-ins"
 keywords = ["linux", "bpf", "instructions", "bytecode", "ebpf" ]
 license = "MIT"
