@@ -777,7 +777,6 @@ impl Opcode {
     }
 }
 
-#[repr(C, align(8))]
 #[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Instruction {
     opcode: Opcode,
