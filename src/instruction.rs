@@ -611,7 +611,7 @@ impl Opcode {
 }
 
 #[repr(C, align(8))]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Instruction {
     opcode: Opcode,
     dst_reg: Register,

@@ -1,7 +1,13 @@
 use crate::Instruction;
 
 pub struct Program {
-    pub instructions: Vec<u64>,
+    instructions: Vec<u64>,
+}
+
+impl Program {
+    pub fn as_slice(&self) -> &[u64] {
+        &self.instructions
+    }
 }
 
 impl From<&[Instruction]> for Program {
