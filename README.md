@@ -1,7 +1,7 @@
 # BPF Instructions
 
 ## Description
-Parsing library for working with eBPF instructions and programs.
+Parsing library for working with eBPF instructions.
 
 ## Example Usage
 ```rust
@@ -9,7 +9,10 @@ Parsing library for working with eBPF instructions and programs.
  * mov R0, 0
  * exit
  */
-let instructions = [ Instruction::mov32(Register::R0, 0), Instruction::exit() ];
+let instructions = [ 
+        Instruction::mov32(Register::R0, 0),
+	Instruction::exit()
+    ];
 ```
 
 ## TODO
