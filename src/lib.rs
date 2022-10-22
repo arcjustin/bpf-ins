@@ -4,7 +4,7 @@ pub use instruction::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::instruction::{Instruction, MemoryOpLoadType, Register};
+    use crate::instruction::{Instruction, MemoryOpLoadType, MemoryOpSize, Register};
 
     fn decode_encode_compare(instruction: &Instruction) {
         let encoded = instruction.encode();
@@ -82,64 +82,6 @@ mod tests {
     }
 
     #[test]
-    fn arithmetic_sub32() {
-        for i in 0..10 {
-            let reg = Register::from_num(i).unwrap();
-
-            let ins = Instruction::sub32(reg, i32::min_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::sub32(reg, 0);
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::sub32(reg, i32::max_value());
-            decode_encode_compare(&ins);
-        }
-    }
-
-    #[test]
-    fn arithmetic_sub64() {
-        for i in 0..10 {
-            let reg = Register::from_num(i).unwrap();
-
-            let ins = Instruction::sub64(reg, i32::min_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::sub64(reg, 0);
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::sub64(reg, i32::max_value());
-            decode_encode_compare(&ins);
-        }
-    }
-
-    #[test]
-    fn arithmetic_subx32() {
-        for i in 0..10 {
-            for j in 0..10 {
-                let dst_reg = Register::from_num(i).unwrap();
-                let src_reg = Register::from_num(j).unwrap();
-
-                let ins = Instruction::subx32(dst_reg, src_reg);
-                decode_encode_compare(&ins);
-            }
-        }
-    }
-
-    #[test]
-    fn arithmetic_subx64() {
-        for i in 0..10 {
-            for j in 0..10 {
-                let dst_reg = Register::from_num(i).unwrap();
-                let src_reg = Register::from_num(j).unwrap();
-
-                let ins = Instruction::subx64(dst_reg, src_reg);
-                decode_encode_compare(&ins);
-            }
-        }
-    }
-
-    #[test]
     fn arithmetic_mov32() {
         for i in 0..10 {
             let reg = Register::from_num(i).unwrap();
@@ -202,40 +144,16 @@ mod tests {
         for i in 0..10 {
             let reg = Register::from_num(i).unwrap();
 
-            let ins = Instruction::load8(reg, i8::min_value());
+            let ins = Instruction::load(reg, i64::min_value(), MemoryOpSize::Byte);
             decode_encode_compare(&ins);
 
-            let ins = Instruction::load8(reg, 0);
+            let ins = Instruction::load(reg, i64::max_value(), crate::MemoryOpSize::HalfWord);
             decode_encode_compare(&ins);
 
-            let ins = Instruction::load8(reg, i8::max_value());
+            let ins = Instruction::load(reg, 0, MemoryOpSize::Word);
             decode_encode_compare(&ins);
 
-            let ins = Instruction::load16(reg, i16::min_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load16(reg, 0);
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load16(reg, i16::max_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load32(reg, i32::min_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load32(reg, 0);
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load32(reg, i32::max_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load64(reg, i64::min_value());
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load64(reg, 0);
-            decode_encode_compare(&ins);
-
-            let ins = Instruction::load64(reg, i64::max_value());
+            let ins = Instruction::load(reg, 1, MemoryOpSize::DoubleWord);
             decode_encode_compare(&ins);
         }
     }
