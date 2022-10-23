@@ -1,5 +1,7 @@
+pub mod display;
 pub mod instruction;
 
+pub use display::*;
 pub use instruction::*;
 
 #[cfg(test)]
