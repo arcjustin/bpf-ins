@@ -1,54 +1,37 @@
 use anyhow::{bail, Context, Result};
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[repr(u8)]
 pub enum OpcodeClass {
-    Load,         // non-standard load
-    LoadReg,      // load into register
-    Store,        // store from immediate
-    StoreReg,     // store from register
-    Arithmetic,   // 32-bit arithmetic
-    Jump,         // 64-bit jumps
-    Jump32,       // 32-bit jumps
-    Arithmetic64, // 64-bit arithmetic
+    Load = 0x00,         // non-standard load
+    LoadReg = 0x01,      // load into register
+    Store = 0x02,        // store from immediate
+    StoreReg = 0x03,     // store from register
+    Arithmetic = 0x04,   // 32-bit arithmetic
+    Jump = 0x05,         // 64-bit jumps
+    Jump32 = 0x06,       // 32-bit jumps
+    Arithmetic64 = 0x07, // 64-bit arithmetic
 }
 
 impl OpcodeClass {
     const MASK: u64 = 0x07;
-    const LOAD: u8 = 0x00;
-    const LOAD_REG: u8 = 0x01;
-    const STORE: u8 = 0x02;
-    const STORE_REG: u8 = 0x03;
-    const ARITHMETIC: u8 = 0x04;
-    const JUMP: u8 = 0x05;
-    const JUMP32: u8 = 0x06;
-    const ARITHMETIC64: u8 = 0x07;
-
     fn from_raw(instruction: u64) -> Self {
         let class = (instruction & Self::MASK) as u8;
         match class {
-            Self::LOAD => Self::Load,
-            Self::LOAD_REG => Self::LoadReg,
-            Self::STORE => Self::Store,
-            Self::STORE_REG => Self::StoreReg,
-            Self::ARITHMETIC => Self::Arithmetic,
-            Self::JUMP => Self::Jump,
-            Self::JUMP32 => Self::Jump32,
-            Self::ARITHMETIC64 => Self::Arithmetic64,
+            x if x == Self::Load as u8 => Self::Load,
+            x if x == Self::LoadReg as u8 => Self::LoadReg,
+            x if x == Self::Store as u8 => Self::Store,
+            x if x == Self::StoreReg as u8 => Self::StoreReg,
+            x if x == Self::Arithmetic as u8 => Self::Arithmetic,
+            x if x == Self::Jump as u8 => Self::Jump,
+            x if x == Self::Jump32 as u8 => Self::Jump32,
+            x if x == Self::Arithmetic64 as u8 => Self::Arithmetic64,
             _ => panic!("Opcode class match arms have been broken"),
         }
     }
 
     fn opcode(&self) -> u8 {
-        match self {
-            Self::Load => Self::LOAD,
-            Self::LoadReg => Self::LOAD_REG,
-            Self::Store => Self::STORE,
-            Self::StoreReg => Self::STORE_REG,
-            Self::Arithmetic => Self::ARITHMETIC,
-            Self::Jump => Self::JUMP,
-            Self::Jump32 => Self::JUMP32,
-            Self::Arithmetic64 => Self::ARITHMETIC64,
-        }
+        *self as u8
     }
 }
 
