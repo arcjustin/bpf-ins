@@ -1,5 +1,13 @@
+// For libraries, it's generally not best practice to use `anyhow::Result`,
+// since it makes it difficult to match on result types. `anyhow::Result` is
+// pretty close to stringly typed errors. For executables, I use
+// `anyhow::Result` since I'm the end user of the error, so I usually just need
+// to log an error message and quit. For custom error enums, I recommend
+// `thiserror`.
 use anyhow::{bail, Context, Result};
 
+// Since the style for all the types in here is similar, my comments generally
+// apply to all of them.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[repr(u8)]
 pub enum OpcodeClass {
@@ -15,6 +23,11 @@ pub enum OpcodeClass {
 
 impl OpcodeClass {
     const MASK: u64 = 0x07;
+    // I would consider renaming this `from_raw_instruction`. Another thing to
+    // consider to improve type safety is to create a `#[repr(transparent)]
+    // struct RawInstruction(pub u64)` type. These wrapper types don't actually
+    // add any overhead at runtime but add clarity in the code about what
+    // exactly is expected instead of using integer types directly.
     fn from_raw(instruction: u64) -> Self {
         let class = (instruction & Self::MASK) as u8;
         match class {
@@ -30,11 +43,14 @@ impl OpcodeClass {
         }
     }
 
+    // Potentially could do the same thing with RawOpcode as I suggested with
+    // RawInstruction, but can't tell yet if there is as much benefit.
     fn opcode(&self) -> u8 {
         *self as u8
     }
 }
 
+// Switch to custom discriminant values
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum SourceOperand {
     Immediate, // use immediate for jump/arithmetic
@@ -62,6 +78,7 @@ impl SourceOperand {
     }
 }
 
+// Can use custom discriminants here as well
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum ArithmeticOperation {
     Add, // dst += src
@@ -97,6 +114,7 @@ impl ArithmeticOperation {
     const ASH: u8 = 0xc0; // dst s>> src
     const END: u8 = 0xd0; // dst: u8 = swap(dst)
 
+    // For these, it may be slightly more idiomatic
     fn from_raw(instruction: u64) -> Option<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {

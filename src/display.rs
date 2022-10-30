@@ -5,6 +5,11 @@ use crate::{
 
 use std::fmt;
 
+// I'd probably split this up into two functions. You could also then make the
+// return type of each function `-> impl Display`. This would be more efficient
+// for the String return type since you wouldn't ever have to create that
+// String and you would instead be writing the value directly into the resulting
+// output buffer.
 fn get_dst_src_str(
     instruction: &Instruction,
     size: MemoryOpSize,
