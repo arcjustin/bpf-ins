@@ -18,6 +18,15 @@
 //!     Instruction::mov32(Register::R0, 0), // mov r0, 0
 //!     Instruction::exit(),                 // exit
 //! ];
+//!
+//! let mut encoded = vec![];
+//! for instruction in &instructions {
+//!     let (x, y) = instruction.encode();
+//!     encoded.push(x);
+//!     if let Some(y) = y {
+//!         encoded.push(y);
+//!     }
+//! }
 //! ```
 //!
 //! ## License

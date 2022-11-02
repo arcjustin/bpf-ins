@@ -4,7 +4,6 @@
 [![mio](https://docs.rs/bpf-ins/badge.svg)](https://docs.rs/bpf-ins/)
 [![Lines of Code](https://tokei.rs/b1/github/arcjustin/bpf-ins?category=code)](https://tokei.rs/b1/github/arcjustin/bpf-ins?category=code)
 
-
 A crate for encoding and decoding eBPF instructions.
 
 ## Usage
@@ -19,6 +18,15 @@ let instructions = [
     Instruction::mov32(Register::R0, 0), // mov r0, 0
     Instruction::exit(),                 // exit
 ];
+
+let mut encoded = vec![];
+for instruction in &instructions {
+    let (x, y) = instruction.encode();
+    encoded.push(x);
+    if let Some(y) = y {
+        encoded.push(y);
+    }
+}
 ```
 
 ## License
