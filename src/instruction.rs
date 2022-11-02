@@ -1,5 +1,7 @@
 use anyhow::{bail, Context, Result};
 
+/// Enum for each opcode defined in the spec. This is the 3 LSB
+/// of the first byte in the instruction.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[repr(u8)]
 pub enum OpcodeClass {
@@ -16,6 +18,7 @@ pub enum OpcodeClass {
 impl OpcodeClass {
     const MASK: u64 = 0x07;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Self {
         let class = (instruction & Self::MASK) as u8;
         match class {
@@ -31,6 +34,7 @@ impl OpcodeClass {
         }
     }
 
+    /// Returns the 3 bits that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         *self as u8
     }
@@ -45,6 +49,7 @@ pub enum SourceOperand {
 impl SourceOperand {
     const MASK: u64 = 0x08;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Self {
         if instruction & Self::MASK == Self::MASK {
             Self::Register
@@ -53,6 +58,7 @@ impl SourceOperand {
         }
     }
 
+    /// Returns the bit that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Register => Self::Register as u8,
@@ -82,6 +88,7 @@ pub enum ArithmeticOperation {
 impl ArithmeticOperation {
     const MASK: u64 = 0xf0;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Option<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {
@@ -103,6 +110,7 @@ impl ArithmeticOperation {
         }
     }
 
+    /// Returns the 4 bits that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Add => Self::Add as u8,
@@ -133,6 +141,7 @@ pub enum SwapOrder {
 impl SwapOrder {
     const MASK: u64 = 0x08;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Self {
         if instruction & Self::MASK == Self::MASK {
             Self::Big
@@ -141,6 +150,7 @@ impl SwapOrder {
         }
     }
 
+    /// Returns the bit that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Big => Self::Big as u8,
@@ -158,6 +168,7 @@ pub struct ArithmeticInstruction {
 }
 
 impl ArithmeticInstruction {
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
@@ -174,6 +185,7 @@ impl ArithmeticInstruction {
         })
     }
 
+    /// Returns the full opcode (first byte) for this instruction.
     fn as_opcode(&self) -> u8 {
         self.class.as_opcode()
             | self.source.as_opcode()
@@ -259,6 +271,7 @@ pub enum JumpOperation {
 impl JumpOperation {
     const MASK: u64 = 0xf0;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Option<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {
@@ -280,6 +293,7 @@ impl JumpOperation {
         }
     }
 
+    /// Returns the 4 bits that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Absolute => Self::Absolute as u8,
@@ -308,6 +322,7 @@ pub struct JumpInstruction {
 }
 
 impl JumpInstruction {
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
@@ -323,6 +338,7 @@ impl JumpInstruction {
         })
     }
 
+    /// Returns the full opcode (first byte) for this instruction.
     fn as_opcode(&self) -> u8 {
         self.class.as_opcode() | self.source.as_opcode() | self.operation.as_opcode()
     }
@@ -390,6 +406,7 @@ pub enum MemoryOpSize {
 impl MemoryOpSize {
     const MASK: u64 = 0x18;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Option<Self> {
         let size = (instruction & Self::MASK) as u8;
         match size {
@@ -401,6 +418,7 @@ impl MemoryOpSize {
         }
     }
 
+    /// Returns the 2 bits that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Word => Self::Word as u8,
@@ -421,6 +439,7 @@ pub enum MemoryOpMode {
 impl MemoryOpMode {
     const MASK: u64 = 0xe0;
 
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Option<Self> {
         let mode = (instruction & Self::MASK) as u8;
         match mode {
@@ -431,6 +450,7 @@ impl MemoryOpMode {
         }
     }
 
+    /// Returns the 2 bits that makes up this value in the opcode byte.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Immediate => Self::Immediate as u8,
@@ -473,6 +493,7 @@ pub struct MemoryInstruction {
 }
 
 impl MemoryInstruction {
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
@@ -492,6 +513,7 @@ impl MemoryInstruction {
         })
     }
 
+    /// Returns the full opcode (first byte) for this instruction.
     fn as_opcode(&self) -> u8 {
         self.class.as_opcode() | self.size.as_opcode() | self.mode.as_opcode()
     }
@@ -694,6 +716,7 @@ pub enum Opcode {
 }
 
 impl Opcode {
+    /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
@@ -712,6 +735,7 @@ impl Opcode {
         }
     }
 
+    /// Returns the full opcode (first byte) for this instruction.
     fn as_opcode(&self) -> u8 {
         match self {
             Self::Arithmetic(arithmetic) => arithmetic.as_opcode(),
@@ -720,6 +744,7 @@ impl Opcode {
         }
     }
 
+    /// Returns whether the instruction is wide (uses two 64-bit numbers).
     fn is_wide(&self) -> bool {
         if let Self::Memory(memory_instruction) = self {
             matches!(memory_instruction.size, MemoryOpSize::DoubleWord)
