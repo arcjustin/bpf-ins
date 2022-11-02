@@ -40,6 +40,7 @@ impl OpcodeClass {
     }
 }
 
+/// The source operand portion of the instruction's opcode.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum SourceOperand {
     Immediate = 0x00, // use immediate for jump/arithmetic
@@ -67,6 +68,7 @@ impl SourceOperand {
     }
 }
 
+/// The arithmetic portion of the instruction's opcode.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum ArithmeticOperation {
     Add = 0x00, // dst += src
@@ -131,6 +133,7 @@ impl ArithmeticOperation {
     }
 }
 
+/// The swap order portion of the instruction's opcode.
 #[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub enum SwapOrder {
     #[default]
@@ -159,6 +162,7 @@ impl SwapOrder {
     }
 }
 
+/// Represents a full arithmetic opcode: class, source, operation, order.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ArithmeticOpcode {
     class: OpcodeClass,
@@ -249,6 +253,7 @@ impl ArithmeticOpcode {
     }
 }
 
+/// The jump operation portion of the instruction's opcode.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum JumpOperation {
     Absolute = 0x00,
@@ -313,6 +318,7 @@ impl JumpOperation {
     }
 }
 
+/// Represents a full jump opcode: class, source, operation.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct JumpOpcode {
     class: OpcodeClass,
@@ -393,6 +399,7 @@ impl JumpOpcode {
     }
 }
 
+/// The memory operation size portion of the instruction's opcode.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum MemoryOpSize {
     Word = 0x00,
@@ -427,6 +434,7 @@ impl MemoryOpSize {
     }
 }
 
+/// The memory operation mode portion of the instruction's opcode.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum MemoryOpMode {
     Immediate = 0x00,
@@ -458,6 +466,8 @@ impl MemoryOpMode {
     }
 }
 
+/// The type of immediate load to perform on a register. Used for adding type information
+/// to BPF function calls.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum MemoryOpLoadType {
     Void,
@@ -483,6 +493,7 @@ impl MemoryOpLoadType {
     }
 }
 
+/// Represents a full memory opcode: class, size, mode.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct MemoryOpcode {
     class: OpcodeClass,
@@ -566,6 +577,7 @@ impl MemoryOpcode {
     }
 }
 
+/// Defines all available registers.
 #[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Register {
     #[default]
@@ -704,6 +716,7 @@ impl Register {
     }
 }
 
+/// An enum that holds on of the possible opcodes.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Opcode {
     Arithmetic(ArithmeticOpcode),
@@ -751,6 +764,7 @@ impl Opcode {
     }
 }
 
+/// Represents a full eBPF instruction: opcode, src register, dst register, offset, immediate.
 #[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Instruction {
     opcode: Opcode,
