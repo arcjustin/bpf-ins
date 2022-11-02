@@ -15,7 +15,8 @@ pub enum OpcodeClass {
 
 impl OpcodeClass {
     const MASK: u64 = 0x07;
-    fn from_raw(instruction: u64) -> Self {
+
+    fn from_raw_instruction(instruction: u64) -> Self {
         let class = (instruction & Self::MASK) as u8;
         match class {
             x if x == Self::Load as u8 => Self::Load,
@@ -37,14 +38,12 @@ impl OpcodeClass {
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum SourceOperand {
-    Immediate, // use immediate for jump/arithmetic
-    Register,  // use source register for jump/arithmetic
+    Immediate = 0x00, // use immediate for jump/arithmetic
+    Register = 0x08,  // use source register for jump/arithmetic
 }
 
 impl SourceOperand {
     const MASK: u64 = 0x08;
-    const IMMEDIATE: u8 = 0x00;
-    const REGISTER: u8 = 0x08;
 
     fn from_raw(instruction: u64) -> Self {
         if instruction & Self::MASK == Self::MASK {
@@ -56,84 +55,70 @@ impl SourceOperand {
 
     fn opcode(&self) -> u8 {
         match self {
-            Self::Register => Self::REGISTER,
-            Self::Immediate => Self::IMMEDIATE,
+            Self::Register => Self::Register as u8,
+            Self::Immediate => Self::Immediate as u8,
         }
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum ArithmeticOperation {
-    Add, // dst += src
-    Sub, // dst -= src
-    Mul, // dst *= src
-    Div, // dst /= src
-    Or,  // dst |= src
-    And, // dst &= src
-    Lhs, // dst <<= src
-    Rhs, // dst >>= src
-    Neg, // dst = ~src
-    Mod, // dst %= src
-    Xor, // dst ^= src
-    Mov, // dst = src
-    Ash, // dst s>> src
-    End, // dst = swap(dst)
+    Add = 0x00, // dst += src
+    Sub = 0x10, // dst -= src
+    Mul = 0x20, // dst *= src
+    Div = 0x30, // dst /= src
+    Or = 0x40,  // dst |= src
+    And = 0x50, // dst &= src
+    Lhs = 0x60, // dst <<= src
+    Rhs = 0x70, // dst >>= src
+    Neg = 0x80, // dst = ~src
+    Mod = 0x90, // dst %= src
+    Xor = 0xa0, // dst ^= src
+    Mov = 0xb0, // dst = src
+    Ash = 0xc0, // dst s>> src
+    End = 0xd0, // dst = swap(dst)
 }
 
 impl ArithmeticOperation {
     const MASK: u64 = 0xf0;
-    const ADD: u8 = 0x00; // dst += src
-    const SUB: u8 = 0x10; // dst -= src
-    const MUL: u8 = 0x20; // dst *= src
-    const DIV: u8 = 0x30; // dst /= src
-    const OR: u8 = 0x40; // dst |= src
-    const AND: u8 = 0x50; // dst &= src
-    const LHS: u8 = 0x60; // dst <<= src
-    const RHS: u8 = 0x70; // dst >>= src
-    const NEG: u8 = 0x80; // dst: u8 = ~src
-    const MOD: u8 = 0x90; // dst %= src
-    const XOR: u8 = 0xa0; // dst ^= src
-    const MOV: u8 = 0xb0; // dst: u8 = src
-    const ASH: u8 = 0xc0; // dst s>> src
-    const END: u8 = 0xd0; // dst: u8 = swap(dst)
 
     fn from_raw(instruction: u64) -> Option<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {
-            Self::ADD => Some(Self::Add),
-            Self::SUB => Some(Self::Sub),
-            Self::MUL => Some(Self::Mul),
-            Self::DIV => Some(Self::Div),
-            Self::OR => Some(Self::Or),
-            Self::AND => Some(Self::And),
-            Self::LHS => Some(Self::Lhs),
-            Self::RHS => Some(Self::Rhs),
-            Self::NEG => Some(Self::Neg),
-            Self::MOD => Some(Self::Mod),
-            Self::XOR => Some(Self::Xor),
-            Self::MOV => Some(Self::Mov),
-            Self::ASH => Some(Self::Ash),
-            Self::END => Some(Self::End),
+            x if x == Self::Add as u8 => Some(Self::Add),
+            x if x == Self::Sub as u8 => Some(Self::Sub),
+            x if x == Self::Mul as u8 => Some(Self::Mul),
+            x if x == Self::Div as u8 => Some(Self::Div),
+            x if x == Self::Or as u8 => Some(Self::Or),
+            x if x == Self::And as u8 => Some(Self::And),
+            x if x == Self::Lhs as u8 => Some(Self::Lhs),
+            x if x == Self::Rhs as u8 => Some(Self::Rhs),
+            x if x == Self::Neg as u8 => Some(Self::Neg),
+            x if x == Self::Mod as u8 => Some(Self::Mod),
+            x if x == Self::Xor as u8 => Some(Self::Xor),
+            x if x == Self::Mov as u8 => Some(Self::Mov),
+            x if x == Self::Ash as u8 => Some(Self::Ash),
+            x if x == Self::End as u8 => Some(Self::End),
             _ => None,
         }
     }
 
     fn opcode(&self) -> u8 {
         match self {
-            Self::Add => Self::ADD,
-            Self::Sub => Self::SUB,
-            Self::Mul => Self::MUL,
-            Self::Div => Self::DIV,
-            Self::Or => Self::OR,
-            Self::And => Self::AND,
-            Self::Lhs => Self::LHS,
-            Self::Rhs => Self::RHS,
-            Self::Neg => Self::NEG,
-            Self::Mod => Self::MOD,
-            Self::Xor => Self::XOR,
-            Self::Mov => Self::MOV,
-            Self::Ash => Self::ASH,
-            Self::End => Self::END,
+            Self::Add => Self::Add as u8,
+            Self::Sub => Self::Sub as u8,
+            Self::Mul => Self::Mul as u8,
+            Self::Div => Self::Div as u8,
+            Self::Or => Self::Or as u8,
+            Self::And => Self::And as u8,
+            Self::Lhs => Self::Lhs as u8,
+            Self::Rhs => Self::Rhs as u8,
+            Self::Neg => Self::Neg as u8,
+            Self::Mod => Self::Mod as u8,
+            Self::Xor => Self::Xor as u8,
+            Self::Mov => Self::Mov as u8,
+            Self::Ash => Self::Ash as u8,
+            Self::End => Self::End as u8,
         }
     }
 }
@@ -147,8 +132,6 @@ pub enum SwapOrder {
 
 impl SwapOrder {
     const MASK: u64 = 0x08;
-    const LITTLE: u8 = 0x00;
-    const BIG: u8 = 0x08;
 
     fn from_raw(instruction: u64) -> Self {
         if instruction & Self::MASK == Self::MASK {
@@ -160,8 +143,8 @@ impl SwapOrder {
 
     fn opcode(&self) -> u8 {
         match self {
-            Self::Big => Self::BIG,
-            Self::Little => Self::LITTLE,
+            Self::Big => Self::Big as u8,
+            Self::Little => Self::Little as u8,
         }
     }
 }
@@ -254,76 +237,62 @@ impl ArithmeticInstruction {
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum JumpOperation {
-    Absolute,
-    IfEqual,
-    IfGreater,
-    IfGreaterOrEqual,
-    IfAnd,
-    IfNotEqual,
-    IfSignedGreater,
-    IfSignedGreaterOrEqual,
-    Call,
-    Exit,
-    IfLessThan,
-    IfLessThanOrEqual,
-    IfSignedLessThan,
-    IfSignedLessThanOrEqual,
+    Absolute = 0x00,
+    IfEqual = 0x10,
+    IfGreater = 0x20,
+    IfGreaterOrEqual = 0x30,
+    IfAnd = 0x40,
+    IfNotEqual = 0x50,
+    IfSignedGreater = 0x60,
+    IfSignedGreaterOrEqual = 0x70,
+    Call = 0x80,
+    Exit = 0x90,
+    IfLessThan = 0xa0,
+    IfLessThanOrEqual = 0xb0,
+    IfSignedLessThan = 0xc0,
+    IfSignedLessThanOrEqual = 0xd0,
 }
 
 impl JumpOperation {
     const MASK: u64 = 0xf0;
-    const ABS: u8 = 0x00;
-    const EQ: u8 = 0x10;
-    const GT: u8 = 0x20;
-    const GTE: u8 = 0x30;
-    const AND: u8 = 0x40;
-    const NEQ: u8 = 0x50;
-    const SGT: u8 = 0x60;
-    const SGTE: u8 = 0x70;
-    const CALL: u8 = 0x80;
-    const EXIT: u8 = 0x90;
-    const LT: u8 = 0xa0;
-    const LTE: u8 = 0xb0;
-    const SLT: u8 = 0xc0;
-    const SLTE: u8 = 0xd0;
 
     fn from_raw(instruction: u64) -> Option<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {
-            Self::ABS => Some(Self::Absolute),
-            Self::EQ => Some(Self::IfEqual),
-            Self::GT => Some(Self::IfGreater),
-            Self::GTE => Some(Self::IfGreaterOrEqual),
-            Self::AND => Some(Self::IfAnd),
-            Self::NEQ => Some(Self::IfNotEqual),
-            Self::SGT => Some(Self::IfSignedGreater),
-            Self::SGTE => Some(Self::IfSignedGreaterOrEqual),
-            Self::CALL => Some(Self::Call),
-            Self::EXIT => Some(Self::Exit),
-            Self::LT => Some(Self::IfLessThan),
-            Self::LTE => Some(Self::IfLessThanOrEqual),
-            Self::SLT => Some(Self::IfSignedLessThan),
-            Self::SLTE => Some(Self::IfSignedLessThanOrEqual),
+            x if x == Self::Absolute as u8 => Some(Self::Absolute),
+            x if x == Self::IfEqual as u8 => Some(Self::IfEqual),
+            x if x == Self::IfGreater as u8 => Some(Self::IfGreater),
+            x if x == Self::IfGreaterOrEqual as u8 => Some(Self::IfGreaterOrEqual),
+            x if x == Self::IfAnd as u8 => Some(Self::IfAnd),
+            x if x == Self::IfNotEqual as u8 => Some(Self::IfNotEqual),
+            x if x == Self::IfSignedGreater as u8 => Some(Self::IfSignedGreater),
+            x if x == Self::IfSignedGreaterOrEqual as u8 => Some(Self::IfSignedGreaterOrEqual),
+            x if x == Self::Call as u8 => Some(Self::Call),
+            x if x == Self::Exit as u8 => Some(Self::Exit),
+            x if x == Self::IfLessThan as u8 => Some(Self::IfLessThan),
+            x if x == Self::IfLessThanOrEqual as u8 => Some(Self::IfLessThanOrEqual),
+            x if x == Self::IfSignedLessThan as u8 => Some(Self::IfSignedLessThan),
+            x if x == Self::IfSignedLessThanOrEqual as u8 => Some(Self::IfSignedLessThanOrEqual),
             _ => None,
         }
     }
 
     fn opcode(&self) -> u8 {
         match self {
-            Self::Absolute => Self::ABS,
-            Self::IfEqual => Self::EQ,
-            Self::IfGreater => Self::GT,
-            Self::IfGreaterOrEqual => Self::GTE,
-            Self::IfAnd => Self::AND,
-            Self::IfNotEqual => Self::NEQ,
-            Self::IfSignedGreater => Self::SGT,
-            Self::IfSignedGreaterOrEqual => Self::SGTE,
-            Self::Call => Self::CALL,
-            Self::Exit => Self::EXIT,
-            Self::IfLessThan => Self::LT,
-            Self::IfLessThanOrEqual => Self::LTE,
-            Self::IfSignedLessThan => Self::SLT,
-            Self::IfSignedLessThanOrEqual => Self::SLTE,
+            Self::Absolute => Self::Absolute as u8,
+            Self::IfEqual => Self::IfEqual as u8,
+            Self::IfGreater => Self::IfGreater as u8,
+            Self::IfGreaterOrEqual => Self::IfGreaterOrEqual as u8,
+            Self::IfAnd => Self::IfAnd as u8,
+            Self::IfNotEqual => Self::IfNotEqual as u8,
+            Self::IfSignedGreater => Self::IfSignedGreater as u8,
+            Self::IfSignedGreaterOrEqual => Self::IfSignedGreaterOrEqual as u8,
+            Self::Call => Self::Call as u8,
+            Self::Exit => Self::Exit as u8,
+            Self::IfLessThan => Self::IfLessThan as u8,
+            Self::IfLessThanOrEqual => Self::IfLessThanOrEqual as u8,
+            Self::IfSignedLessThan => Self::IfSignedLessThan as u8,
+            Self::IfSignedLessThanOrEqual => Self::IfSignedLessThanOrEqual as u8,
         }
     }
 }
@@ -408,68 +377,61 @@ impl JumpInstruction {
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum MemoryOpSize {
-    Word,
-    HalfWord,
-    Byte,
-    DoubleWord,
+    Word = 0x00,
+    HalfWord = 0x08,
+    Byte = 0x10,
+    DoubleWord = 0x18,
 }
 
 impl MemoryOpSize {
     const MASK: u64 = 0x18;
-    const WORD: u8 = 0x00;
-    const HALF_WORD: u8 = 0x08;
-    const BYTE: u8 = 0x10;
-    const DOUBLE_WORD: u8 = 0x18;
 
     fn from_raw(instruction: u64) -> Option<Self> {
         let size = (instruction & Self::MASK) as u8;
         match size {
-            Self::WORD => Some(Self::Word),
-            Self::HALF_WORD => Some(Self::HalfWord),
-            Self::BYTE => Some(Self::Byte),
-            Self::DOUBLE_WORD => Some(Self::DoubleWord),
+            x if x == Self::Word as u8 => Some(Self::Word),
+            x if x == Self::HalfWord as u8 => Some(Self::HalfWord),
+            x if x == Self::Byte as u8 => Some(Self::Byte),
+            x if x == Self::DoubleWord as u8 => Some(Self::DoubleWord),
             _ => None,
         }
     }
 
     fn opcode(&self) -> u8 {
         match self {
-            Self::Word => Self::WORD,
-            Self::HalfWord => Self::HALF_WORD,
-            Self::Byte => Self::BYTE,
-            Self::DoubleWord => Self::DOUBLE_WORD,
+            Self::Word => Self::Word as u8,
+            Self::HalfWord => Self::HalfWord as u8,
+            Self::Byte => Self::Byte as u8,
+            Self::DoubleWord => Self::DoubleWord as u8,
         }
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum MemoryOpMode {
-    Immediate,
-    Memory,
-    Atomic,
+    Immediate = 0x00,
+    Memory = 0x60,
+    Atomic = 0xc0,
 }
 
 impl MemoryOpMode {
     const MASK: u64 = 0xe0;
-    const IMMEDIATE: u8 = 0x00;
-    const MEMORY: u8 = 0x60;
-    const ATOMIC: u8 = 0xc0;
 
     fn from_raw(instruction: u64) -> Option<Self> {
         let mode = (instruction & Self::MASK) as u8;
         match mode {
-            Self::IMMEDIATE => Some(Self::Immediate),
-            Self::MEMORY => Some(Self::Memory),
-            Self::ATOMIC => Some(Self::Atomic),
+            x if x == Self::Immediate as u8 => Some(Self::Immediate),
+            x if x == Self::Memory as u8 => Some(Self::Memory),
+            x if x == Self::Atomic as u8 => Some(Self::Atomic),
             _ => None,
         }
     }
 
     fn opcode(&self) -> u8 {
         match self {
-            Self::Immediate => Self::IMMEDIATE,
-            Self::Memory => Self::MEMORY,
-            Self::Atomic => Self::ATOMIC,
+            Self::Immediate => Self::Immediate as u8,
+            Self::Memory => Self::Memory as u8,
+            Self::Atomic => Self::Atomic as u8,
         }
     }
 }
