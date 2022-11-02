@@ -1,7 +1,8 @@
-pub mod display;
+mod display;
+pub mod error;
 pub mod instruction;
 
-pub use display::*;
+pub use error::{Error, Result};
 pub use instruction::*;
 
 #[cfg(test)]

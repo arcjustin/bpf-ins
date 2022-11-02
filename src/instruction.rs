@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use crate::error::{Error, Result};
 
 /// Enum for each opcode defined in the spec. This is the 3 LSB
 /// of the first byte in the instruction.
@@ -30,7 +30,7 @@ impl OpcodeClass {
             x if x == Self::Jump as u8 => Self::Jump,
             x if x == Self::Jump32 as u8 => Self::Jump32,
             x if x == Self::Arithmetic64 as u8 => Self::Arithmetic64,
-            _ => panic!("Opcode class match arms have been broken"),
+            _ => unreachable!("Mask or match arms have been broken"),
         }
     }
 
@@ -89,24 +89,24 @@ impl ArithmeticOperation {
     const MASK: u64 = 0xf0;
 
     /// Creates an instance of this object from a full, raw instruction.
-    fn from_raw_instruction(instruction: u64) -> Option<Self> {
+    fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {
-            x if x == Self::Add as u8 => Some(Self::Add),
-            x if x == Self::Sub as u8 => Some(Self::Sub),
-            x if x == Self::Mul as u8 => Some(Self::Mul),
-            x if x == Self::Div as u8 => Some(Self::Div),
-            x if x == Self::Or as u8 => Some(Self::Or),
-            x if x == Self::And as u8 => Some(Self::And),
-            x if x == Self::Lhs as u8 => Some(Self::Lhs),
-            x if x == Self::Rhs as u8 => Some(Self::Rhs),
-            x if x == Self::Neg as u8 => Some(Self::Neg),
-            x if x == Self::Mod as u8 => Some(Self::Mod),
-            x if x == Self::Xor as u8 => Some(Self::Xor),
-            x if x == Self::Mov as u8 => Some(Self::Mov),
-            x if x == Self::Ash as u8 => Some(Self::Ash),
-            x if x == Self::End as u8 => Some(Self::End),
-            _ => None,
+            x if x == Self::Add as u8 => Ok(Self::Add),
+            x if x == Self::Sub as u8 => Ok(Self::Sub),
+            x if x == Self::Mul as u8 => Ok(Self::Mul),
+            x if x == Self::Div as u8 => Ok(Self::Div),
+            x if x == Self::Or as u8 => Ok(Self::Or),
+            x if x == Self::And as u8 => Ok(Self::And),
+            x if x == Self::Lhs as u8 => Ok(Self::Lhs),
+            x if x == Self::Rhs as u8 => Ok(Self::Rhs),
+            x if x == Self::Neg as u8 => Ok(Self::Neg),
+            x if x == Self::Mod as u8 => Ok(Self::Mod),
+            x if x == Self::Xor as u8 => Ok(Self::Xor),
+            x if x == Self::Mov as u8 => Ok(Self::Mov),
+            x if x == Self::Ash as u8 => Ok(Self::Ash),
+            x if x == Self::End as u8 => Ok(Self::End),
+            x => Err(Error::InvalidArithmeticOperation(x)),
         }
     }
 
@@ -173,14 +173,13 @@ impl ArithmeticInstruction {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
             OpcodeClass::Arithmetic | OpcodeClass::Arithmetic64 => (),
-            _ => bail!("Tried to decode arithmetic instruction for non-arithmetic class"),
+            _ => return Err(Error::InvalidOpcode(instruction as u8)),
         }
 
         Ok(Self {
             class,
             source: SourceOperand::from_raw_instruction(instruction),
-            operation: ArithmeticOperation::from_raw_instruction(instruction)
-                .context("Invalid arithmetic operation")?,
+            operation: ArithmeticOperation::from_raw_instruction(instruction)?,
             order: SwapOrder::from_raw_instruction(instruction),
         })
     }
@@ -272,24 +271,24 @@ impl JumpOperation {
     const MASK: u64 = 0xf0;
 
     /// Creates an instance of this object from a full, raw instruction.
-    fn from_raw_instruction(instruction: u64) -> Option<Self> {
+    fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let operation = (instruction & Self::MASK) as u8;
         match operation {
-            x if x == Self::Absolute as u8 => Some(Self::Absolute),
-            x if x == Self::IfEqual as u8 => Some(Self::IfEqual),
-            x if x == Self::IfGreater as u8 => Some(Self::IfGreater),
-            x if x == Self::IfGreaterOrEqual as u8 => Some(Self::IfGreaterOrEqual),
-            x if x == Self::IfAnd as u8 => Some(Self::IfAnd),
-            x if x == Self::IfNotEqual as u8 => Some(Self::IfNotEqual),
-            x if x == Self::IfSignedGreater as u8 => Some(Self::IfSignedGreater),
-            x if x == Self::IfSignedGreaterOrEqual as u8 => Some(Self::IfSignedGreaterOrEqual),
-            x if x == Self::Call as u8 => Some(Self::Call),
-            x if x == Self::Exit as u8 => Some(Self::Exit),
-            x if x == Self::IfLessThan as u8 => Some(Self::IfLessThan),
-            x if x == Self::IfLessThanOrEqual as u8 => Some(Self::IfLessThanOrEqual),
-            x if x == Self::IfSignedLessThan as u8 => Some(Self::IfSignedLessThan),
-            x if x == Self::IfSignedLessThanOrEqual as u8 => Some(Self::IfSignedLessThanOrEqual),
-            _ => None,
+            x if x == Self::Absolute as u8 => Ok(Self::Absolute),
+            x if x == Self::IfEqual as u8 => Ok(Self::IfEqual),
+            x if x == Self::IfGreater as u8 => Ok(Self::IfGreater),
+            x if x == Self::IfGreaterOrEqual as u8 => Ok(Self::IfGreaterOrEqual),
+            x if x == Self::IfAnd as u8 => Ok(Self::IfAnd),
+            x if x == Self::IfNotEqual as u8 => Ok(Self::IfNotEqual),
+            x if x == Self::IfSignedGreater as u8 => Ok(Self::IfSignedGreater),
+            x if x == Self::IfSignedGreaterOrEqual as u8 => Ok(Self::IfSignedGreaterOrEqual),
+            x if x == Self::Call as u8 => Ok(Self::Call),
+            x if x == Self::Exit as u8 => Ok(Self::Exit),
+            x if x == Self::IfLessThan as u8 => Ok(Self::IfLessThan),
+            x if x == Self::IfLessThanOrEqual as u8 => Ok(Self::IfLessThanOrEqual),
+            x if x == Self::IfSignedLessThan as u8 => Ok(Self::IfSignedLessThan),
+            x if x == Self::IfSignedLessThanOrEqual as u8 => Ok(Self::IfSignedLessThanOrEqual),
+            x => Err(Error::InvalidJumpOperation(x)),
         }
     }
 
@@ -327,14 +326,13 @@ impl JumpInstruction {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
             OpcodeClass::Jump | OpcodeClass::Jump32 => (),
-            _ => bail!("Tried to decode jump instruction for non-jump class"),
+            _ => return Err(Error::InvalidOpcode(instruction as u8)),
         }
 
         Ok(Self {
             class,
             source: SourceOperand::from_raw_instruction(instruction),
-            operation: JumpOperation::from_raw_instruction(instruction)
-                .context("Invalid jump operation")?,
+            operation: JumpOperation::from_raw_instruction(instruction)?,
         })
     }
 
@@ -407,14 +405,14 @@ impl MemoryOpSize {
     const MASK: u64 = 0x18;
 
     /// Creates an instance of this object from a full, raw instruction.
-    fn from_raw_instruction(instruction: u64) -> Option<Self> {
+    fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let size = (instruction & Self::MASK) as u8;
         match size {
-            x if x == Self::Word as u8 => Some(Self::Word),
-            x if x == Self::HalfWord as u8 => Some(Self::HalfWord),
-            x if x == Self::Byte as u8 => Some(Self::Byte),
-            x if x == Self::DoubleWord as u8 => Some(Self::DoubleWord),
-            _ => None,
+            x if x == Self::Word as u8 => Ok(Self::Word),
+            x if x == Self::HalfWord as u8 => Ok(Self::HalfWord),
+            x if x == Self::Byte as u8 => Ok(Self::Byte),
+            x if x == Self::DoubleWord as u8 => Ok(Self::DoubleWord),
+            x => Err(Error::InvalidMemoryOpSize(x)),
         }
     }
 
@@ -440,13 +438,13 @@ impl MemoryOpMode {
     const MASK: u64 = 0xe0;
 
     /// Creates an instance of this object from a full, raw instruction.
-    fn from_raw_instruction(instruction: u64) -> Option<Self> {
+    fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let mode = (instruction & Self::MASK) as u8;
         match mode {
-            x if x == Self::Immediate as u8 => Some(Self::Immediate),
-            x if x == Self::Memory as u8 => Some(Self::Memory),
-            x if x == Self::Atomic as u8 => Some(Self::Atomic),
-            _ => None,
+            x if x == Self::Immediate as u8 => Ok(Self::Immediate),
+            x if x == Self::Memory as u8 => Ok(Self::Memory),
+            x if x == Self::Atomic as u8 => Ok(Self::Atomic),
+            x => Err(Error::InvalidMemoryOpMode(x)),
         }
     }
 
@@ -501,15 +499,13 @@ impl MemoryInstruction {
             | OpcodeClass::LoadReg
             | OpcodeClass::Store
             | OpcodeClass::StoreReg => (),
-            _ => bail!("Tried to decode memory instruction for non-memory class"),
+            _ => return Err(Error::InvalidOpcode(instruction as u8)),
         }
 
         Ok(Self {
             class,
-            size: MemoryOpSize::from_raw_instruction(instruction)
-                .context("Invalid memory operations size")?,
-            mode: MemoryOpMode::from_raw_instruction(instruction)
-                .context("Invalid memory operation mode")?,
+            size: MemoryOpSize::from_raw_instruction(instruction)?,
+            mode: MemoryOpMode::from_raw_instruction(instruction)?,
         })
     }
 
@@ -599,20 +595,20 @@ impl Register {
     ///
     /// assert_eq!(Register::from_num(5).unwrap(), Register::R5)
     /// ```
-    pub fn from_num(n: u8) -> Option<Self> {
+    pub fn from_num(n: u8) -> Result<Self> {
         match n {
-            0 => Some(Self::R0),
-            1 => Some(Self::R1),
-            2 => Some(Self::R2),
-            3 => Some(Self::R3),
-            4 => Some(Self::R4),
-            5 => Some(Self::R5),
-            6 => Some(Self::R6),
-            7 => Some(Self::R7),
-            8 => Some(Self::R8),
-            9 => Some(Self::R9),
-            10 => Some(Self::R10),
-            _ => None,
+            0 => Ok(Self::R0),
+            1 => Ok(Self::R1),
+            2 => Ok(Self::R2),
+            3 => Ok(Self::R3),
+            4 => Ok(Self::R4),
+            5 => Ok(Self::R5),
+            6 => Ok(Self::R6),
+            7 => Ok(Self::R7),
+            8 => Ok(Self::R8),
+            9 => Ok(Self::R9),
+            10 => Ok(Self::R10),
+            n => Err(Error::InvalidRegisterNumber(n)),
         }
     }
 
@@ -699,11 +695,11 @@ impl Register {
         }
     }
 
-    fn get_dst(instruction: u64) -> Option<Register> {
+    fn get_dst(instruction: u64) -> Result<Register> {
         Self::from_num(((instruction >> 8) & 0xf) as u8)
     }
 
-    fn get_src(instruction: u64) -> Option<Register> {
+    fn get_src(instruction: u64) -> Result<Register> {
         Self::from_num(((instruction >> 12) & 0xf) as u8)
     }
 }
@@ -789,17 +785,17 @@ impl Instruction {
     /// ```
     pub fn decode(instructions: &[u64]) -> Result<Self> {
         if instructions.is_empty() {
-            bail!("No instructions remaining to decode");
+            return Err(Error::NotEnoughInstructions);
         }
 
         let opcode = Opcode::from_raw_instruction(instructions[0])?;
-        let dst_reg = Register::get_dst(instructions[0]).context("Invalid destination register")?;
-        let src_reg = Register::get_src(instructions[0]).context("Invalid source register")?;
+        let dst_reg = Register::get_dst(instructions[0])?;
+        let src_reg = Register::get_src(instructions[0])?;
         let offset = ((instructions[0] >> 16) & 0xffff) as i16;
         let mut imm = ((instructions[0] >> 32) & 0xffffffff) as i64;
         if opcode.is_wide() {
             if instructions.len() < 2 {
-                bail!("Wide instruction was truncated");
+                return Err(Error::NotEnoughInstructions);
             } else {
                 imm |= (instructions[1] as u64 & 0xffffffff00000000) as i64;
             }
