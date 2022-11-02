@@ -1,6 +1,6 @@
 use crate::{
-    ArithmeticInstruction, ArithmeticOperation, Instruction, JumpInstruction, JumpOperation,
-    MemoryInstruction, MemoryOpSize, Opcode, OpcodeClass, SourceOperand,
+    ArithmeticOpcode, ArithmeticOperation, Instruction, JumpOpcode, JumpOperation, MemoryOpSize,
+    MemoryOpcode, Opcode, OpcodeClass, SourceOperand,
 };
 
 use std::fmt;
@@ -22,7 +22,7 @@ fn get_dst_src_str(
 
 fn display_arithmetic(
     instruction: &Instruction,
-    arithmetic: ArithmeticInstruction,
+    arithmetic: ArithmeticOpcode,
     f: &mut fmt::Formatter,
 ) -> fmt::Result {
     let (dst_str, src_str) = get_dst_src_str(
@@ -52,7 +52,7 @@ fn display_arithmetic(
 
 fn display_jump(
     instruction: &Instruction,
-    jump: JumpInstruction,
+    jump: JumpOpcode,
     f: &mut fmt::Formatter,
 ) -> fmt::Result {
     let (dst_str, src_str) =
@@ -90,7 +90,7 @@ fn display_jump(
 
 fn display_memory(
     instruction: &Instruction,
-    memory: MemoryInstruction,
+    memory: MemoryOpcode,
     f: &mut fmt::Formatter,
 ) -> fmt::Result {
     let size = memory.get_size();

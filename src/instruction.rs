@@ -160,14 +160,14 @@ impl SwapOrder {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct ArithmeticInstruction {
+pub struct ArithmeticOpcode {
     class: OpcodeClass,
     source: SourceOperand,
     operation: ArithmeticOperation,
     order: SwapOrder,
 }
 
-impl ArithmeticInstruction {
+impl ArithmeticOpcode {
     /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
@@ -314,13 +314,13 @@ impl JumpOperation {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct JumpInstruction {
+pub struct JumpOpcode {
     class: OpcodeClass,
     source: SourceOperand,
     operation: JumpOperation,
 }
 
-impl JumpInstruction {
+impl JumpOpcode {
     /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
@@ -484,13 +484,13 @@ impl MemoryOpLoadType {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct MemoryInstruction {
+pub struct MemoryOpcode {
     class: OpcodeClass,
     size: MemoryOpSize,
     mode: MemoryOpMode,
 }
 
-impl MemoryInstruction {
+impl MemoryOpcode {
     /// Creates an instance of this object from a full, raw instruction.
     fn from_raw_instruction(instruction: u64) -> Result<Self> {
         let class = OpcodeClass::from_raw_instruction(instruction);
@@ -706,9 +706,9 @@ impl Register {
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Opcode {
-    Arithmetic(ArithmeticInstruction),
-    Jump(JumpInstruction),
-    Memory(MemoryInstruction),
+    Arithmetic(ArithmeticOpcode),
+    Jump(JumpOpcode),
+    Memory(MemoryOpcode),
 }
 
 impl Opcode {
@@ -717,15 +717,15 @@ impl Opcode {
         let class = OpcodeClass::from_raw_instruction(instruction);
         match class {
             OpcodeClass::Arithmetic | OpcodeClass::Arithmetic64 => Ok(Self::Arithmetic(
-                ArithmeticInstruction::from_raw_instruction(instruction)?,
+                ArithmeticOpcode::from_raw_instruction(instruction)?,
             )),
-            OpcodeClass::Jump | OpcodeClass::Jump32 => Ok(Self::Jump(
-                JumpInstruction::from_raw_instruction(instruction)?,
-            )),
+            OpcodeClass::Jump | OpcodeClass::Jump32 => {
+                Ok(Self::Jump(JumpOpcode::from_raw_instruction(instruction)?))
+            }
             OpcodeClass::Load
             | OpcodeClass::LoadReg
             | OpcodeClass::Store
-            | OpcodeClass::StoreReg => Ok(Self::Memory(MemoryInstruction::from_raw_instruction(
+            | OpcodeClass::StoreReg => Ok(Self::Memory(MemoryOpcode::from_raw_instruction(
                 instruction,
             )?)),
         }
@@ -941,7 +941,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0xffffd8f000000104, None))
     /// ```
     pub const fn alu32(reg: Register, imm: i32, op: ArithmeticOperation) -> Self {
-        let opcode = Opcode::Arithmetic(ArithmeticInstruction {
+        let opcode = Opcode::Arithmetic(ArithmeticOpcode {
             class: OpcodeClass::Arithmetic,
             source: SourceOperand::Immediate,
             operation: op,
@@ -973,7 +973,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0xffffd8f000000107, None))
     /// ```
     pub const fn alu64(reg: Register, imm: i32, op: ArithmeticOperation) -> Self {
-        let opcode = Opcode::Arithmetic(ArithmeticInstruction {
+        let opcode = Opcode::Arithmetic(ArithmeticOpcode {
             class: OpcodeClass::Arithmetic64,
             source: SourceOperand::Immediate,
             operation: op,
@@ -1005,7 +1005,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0x212c, None))
     /// ```
     pub const fn alux32(dst_reg: Register, src_reg: Register, op: ArithmeticOperation) -> Self {
-        let opcode = Opcode::Arithmetic(ArithmeticInstruction {
+        let opcode = Opcode::Arithmetic(ArithmeticOpcode {
             class: OpcodeClass::Arithmetic,
             source: SourceOperand::Register,
             operation: op,
@@ -1037,7 +1037,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0x212f, None))
     /// ```
     pub const fn alux64(dst_reg: Register, src_reg: Register, op: ArithmeticOperation) -> Self {
-        let opcode = Opcode::Arithmetic(ArithmeticInstruction {
+        let opcode = Opcode::Arithmetic(ArithmeticOpcode {
             class: OpcodeClass::Arithmetic64,
             source: SourceOperand::Register,
             operation: op,
@@ -1221,7 +1221,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0x910, None))
     /// ```
     pub const fn load(reg: Register, imm: i64, size: MemoryOpSize) -> Self {
-        let opcode = Opcode::Memory(MemoryInstruction {
+        let opcode = Opcode::Memory(MemoryOpcode {
             class: OpcodeClass::Load,
             size,
             mode: MemoryOpMode::Immediate,
@@ -1255,7 +1255,7 @@ impl Instruction {
     /// assert_eq!(instruction.get_src_reg(), Register::R1);
     /// ```
     pub const fn loadtype(reg: Register, imm: i64, load_type: MemoryOpLoadType) -> Self {
-        let opcode = Opcode::Memory(MemoryInstruction {
+        let opcode = Opcode::Memory(MemoryOpcode {
             class: OpcodeClass::Load,
             size: MemoryOpSize::DoubleWord,
             mode: MemoryOpMode::Immediate,
@@ -1295,7 +1295,7 @@ impl Instruction {
         offset: i16,
         size: MemoryOpSize,
     ) -> Self {
-        let opcode = Opcode::Memory(MemoryInstruction {
+        let opcode = Opcode::Memory(MemoryOpcode {
             class: OpcodeClass::LoadReg,
             size,
             mode: MemoryOpMode::Memory,
@@ -1417,7 +1417,7 @@ impl Instruction {
     /// assert_eq!(instruction.get_dst_reg(), Register::R1);
     /// ```
     pub const fn store(reg: Register, offset: i16, imm: i64, size: MemoryOpSize) -> Self {
-        let opcode = Opcode::Memory(MemoryInstruction {
+        let opcode = Opcode::Memory(MemoryOpcode {
             class: OpcodeClass::Store,
             size,
             mode: MemoryOpMode::Memory,
@@ -1545,7 +1545,7 @@ impl Instruction {
         src_reg: Register,
         size: MemoryOpSize,
     ) -> Self {
-        let opcode = Opcode::Memory(MemoryInstruction {
+        let opcode = Opcode::Memory(MemoryOpcode {
             class: OpcodeClass::StoreReg,
             size,
             mode: MemoryOpMode::Memory,
@@ -1667,7 +1667,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0x2400000085, None));
     /// ```
     pub const fn call(n: u32) -> Self {
-        let opcode = Opcode::Jump(JumpInstruction {
+        let opcode = Opcode::Jump(JumpOpcode {
             class: OpcodeClass::Jump,
             source: SourceOperand::Immediate,
             operation: JumpOperation::Call,
@@ -1692,7 +1692,7 @@ impl Instruction {
     /// assert_eq!(instruction.encode(), (0x95, None));
     /// ```
     pub const fn exit() -> Self {
-        let opcode = Opcode::Jump(JumpInstruction {
+        let opcode = Opcode::Jump(JumpOpcode {
             class: OpcodeClass::Jump,
             source: SourceOperand::Immediate,
             operation: JumpOperation::Exit,
