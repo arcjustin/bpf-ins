@@ -5,19 +5,22 @@
 [![Lines of Code](https://tokei.rs/b1/github/arcjustin/bpf-ins?category=code)](https://tokei.rs/b1/github/arcjustin/bpf-ins?category=code)
 
 
-## Description
-Library for encoding and decoding eBPF instructions.
+A crate for encoding and decoding eBPF instructions.
 
 ## Usage
+
 ```rust
-/*
- * return 0
- */
-let instructions = [ 
+use bpf_ins::{Instruction, Register};
+
+//
+// return 0
+//
+let instructions = [
     Instruction::mov32(Register::R0, 0), // mov r0, 0
     Instruction::exit(),                 // exit
 ];
 ```
 
-## TODO
-- Replace `anyhow` with own Result/Error definitions.
+## License
+
+* [MIT license](http://opensource.org/licenses/MIT)
