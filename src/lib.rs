@@ -36,7 +36,7 @@ mod display;
 pub mod error;
 pub mod instruction;
 
-pub use error::{Error, Result};
+pub use error::*;
 pub use instruction::*;
 
 #[cfg(test)]
