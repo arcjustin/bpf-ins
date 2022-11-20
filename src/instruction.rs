@@ -1666,6 +1666,59 @@ impl Instruction {
         Self::storex(dst_reg, offset, src_reg, MemoryOpSize::DoubleWord)
     }
 
+    /// Helper function for creating control-flow instructions.
+    ///
+    /// # Arguments
+    ///
+    /// * `left_reg` - The register on the left side of the operation.
+    /// * `operation` - The operation.
+    /// * `right_reg` - The register on the right side of the operation.
+    /// * `offset` - The offset to jump to, if true.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, JumpOperation, Register};
+    ///
+    /// let instruction = Instruction::jmp_ifx(Register::R1, JumpOperation::IfGreater,
+    /// Register::R2, 5);
+    /// ```
+    pub const fn jmp_ifx(
+        left_reg: Register,
+        operation: JumpOperation,
+        right_reg: Register,
+        offset: i16,
+    ) -> Self {
+        let opcode = Opcode::Jump(JumpOpcode {
+            class: OpcodeClass::Jump,
+            source: SourceOperand::Register,
+            operation,
+        });
+
+        Self {
+            opcode,
+            dst_reg: left_reg,
+            src_reg: right_reg,
+            offset,
+            imm: 0,
+        }
+    }
+
+    /// Helper function for creating an absolute jump instruction.
+    ///
+    /// # Arguments
+    ///
+    /// * `offset` - The absolute jump offset.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction};
+    ///
+    /// let instruction = Instruction::jmp_abs(5);
+    /// ```
+    pub const fn jmp_abs(offset: i16) -> Self {
+        Self::jmp_ifx(Register::R0, JumpOperation::Absolute, Register::R0, offset)
+    }
+
     /// Helper function for creating instructions that call eBPF helpers.
     ///
     /// # Arguments
