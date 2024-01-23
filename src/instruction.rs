@@ -1716,7 +1716,19 @@ impl Instruction {
     /// let instruction = Instruction::jmp_abs(5);
     /// ```
     pub const fn jmp_abs(offset: i16) -> Self {
-        Self::jmp_ifx(Register::R0, JumpOperation::Absolute, Register::R0, offset)
+        let opcode = Opcode::Jump(JumpOpcode {
+            class: OpcodeClass::Jump,
+            source: SourceOperand::Immediate,
+            operation: JumpOperation::Absolute,
+        });
+
+        Self {
+            opcode,
+            dst_reg: Register::R0,
+            src_reg: Register::R0,
+            offset,
+            imm: 0,
+        }
     }
 
     /// Helper function for creating instructions that call eBPF helpers.
