@@ -811,7 +811,7 @@ impl Instruction {
             if instructions.len() < 2 {
                 return Err(Error::NotEnoughInstructions);
             } else {
-                imm |= (instructions[1] as u64 & 0xffffffff00000000) as i64;
+                imm |= (instructions[1] & 0xffffffff00000000) as i64;
             }
         }
 
