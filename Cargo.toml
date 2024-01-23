@@ -1,6 +1,6 @@
 [package]
 name = "bpf-ins"
-version = "0.7.2"
+version = "0.7.3"
 edition = "2021"
 categories = ["compilers", "data-structures"]
 homepage = "https://github.com/arcjustin/bpf-ins"
