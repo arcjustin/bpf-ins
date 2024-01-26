@@ -1703,6 +1703,42 @@ impl Instruction {
         }
     }
 
+    /// Helper function for creating control-flow instructions.
+    ///
+    /// # Arguments
+    ///
+    /// * `left_reg` - The register on the left side of the operation.
+    /// * `operation` - The operation.
+    /// * `right_imm` - The value on the right side of the operation.
+    /// * `offset` - The offset to jump to, if true.
+    ///
+    /// # Example
+    /// ```
+    /// use bpf_ins::{Instruction, JumpOperation, Register};
+    ///
+    /// let instruction = Instruction::jmp_if(Register::R1, JumpOperation::IfGreater, 0, 5);
+    /// ```
+    pub const fn jmp_if(
+        left_reg: Register,
+        operation: JumpOperation,
+        right_imm: i64,
+        offset: i16,
+    ) -> Self {
+        let opcode = Opcode::Jump(JumpOpcode {
+            class: OpcodeClass::Jump,
+            source: SourceOperand::Immediate,
+            operation,
+        });
+
+        Self {
+            opcode,
+            dst_reg: left_reg,
+            src_reg: Register::R0,
+            offset,
+            imm: right_imm,
+        }
+    }
+
     /// Helper function for creating an absolute jump instruction.
     ///
     /// # Arguments
